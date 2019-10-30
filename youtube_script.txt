@@ -1,0 +1,193 @@
+CREATE DATABASE TESTDB; 		      	-- this creates our database
+\l 						                     	-- lets you view all current databases
+\c testdb; 						              -- this puts us into the database table
+CREATE TABLE test (column1 text);   -- creates a table with one column named 'column1' that is of type 'text'
+\dt                                 -- this lets us list all the tables in the current database
+SELECT * FROM test;                 -- "give me all of the columns values in the table test "
+INSERT INTO test (column1) VALUES ('test text number 1',);  -- insert the value into the row in column 1
+INSERT INTO test (column1) VALUES ('test text number 3'),('test text number 4');  -- this is how you insert multiple things into the table at once
+
+/* creating multy column table */
+
+CREATE TABLE test2 (text_col text, number smallint, date timestamp);
+INSERT INTO test2 (text_col, number, date) VALUES('texty1','100', null) ;   -- inserting one row into the multicolumn table
+UPDATE test2 SET date = now();  -- postgres function, takes the current time
+INSERT INTO test2 VALUES('row 2', '2324',null), ('row 3', '1342' null);
+UPDATE test2 SET date = now();    -- this updates ALL the values in date
+UPDATE test SET number = 0 WHERE text_col = 'row 2';  -- updating a specific row with the where clause  , ordering doesn't matter
+
+/* now we will mess around with the unique id stuff */
+
+INSERT INTO test2 VALUES('row 2', '23242',null);    -- at this point we have two elements who have same attributes.
+UPDATE test2 SET number=2 WHERE text_col = 'row 2';   -- we see here that the alias of names causes both of them to update.
+
+/* we will handle this by adding a column to the table with the specific ids */
+ALTER TABLE test2 ADD COLUMN id uuid;  -- created the column , to set unique id's we have to automatically generate them
+ALTER TABLE test DROP COLUMN id;
+ALTER TABLE test2 ADD COLUMN id uuid PRIMARY KEY DEFAULT uuid_generate_v4();  -- now this adds the column but fills them in with unique id's
+
+
+SELECT id, text_col, date FROM test2;   -- grabbing specific columns from the table
+
+DROP DATABASE testdb;     -- dropping the database since we don't need it anymore
+
+
+
+/* EVERYTHING FROM HERE ON IS CREATING ANOTHER DATABASE FROM ANOTHER YOUTUBE VIDEO */
+
+CREATE DATABASE mydatabase;
+\c mydatabase
+
+CREATE TABLE company (id int primary not null, name text not null, age smallint not null, address char(50), salary real);   /* makes table*/
+\d   -- describes the table
+
+-- all strings need to have quotes
+INSERT INTO COMPANY(id, name, age, address, salary) VALUES(7,'Rahul',20,'Kolkata',50000);
+
+/* we can also just do it without defining the values that you are putting in */
+INSERT INTO company values(4,'PRIYA',24,'Dehli', 30000);
+
+/* arithemetic operations in posgreSQL */
+select 2+3;
+select 10-3;
+select 10/3;
+select 14%4;
+select 2^3;
+select 5!;
+
+/* WHERE clause and comparison operators */
+ALTER TABLE company
+ALTER COLUMN address TYPE char(10);     /* doing this to make the table viewable in the terminal */
+
+INSERT INTO company VALUES                /* inserting values into the table */
+(11,'sharkeesha', 40, 'America' , 20000),
+(9,'Kumar', 50, 'Delhi', 2000),
+(7,'Rishi', 40, 'Mumbai', 5000),
+(111,'Sunil', 12, 'Mumbai', 3000);
+
+SELECT name FROM company WHERE age=40;
+SELECT name,salary FROM company where age >=34;
+SELECT * FROM company WHERE age != 40;          /* Give me everything about the members who fit this clause */
+
+
+/* logical operators */
+
+SELECT * FROM company WHERE age >= 40 AND SALARY > 2000;
+SELECT * FROM company WHERE salary IS null;   -- examining the exact value of the contents of salary column
+SELECT * FROM company WHERE name LIKE 'P%';    /* give me anything in the table where the name starts with a p */
+SELECT * FROM company WHERE name LIKE '%P';
+SELECT * FROM company WHERE name LIKE '%P%';
+
+SELECT * FROM company WHERE age in ('20','34','40');  /* return results are either 20, 34, 40 */
+SELECT * FROM company WHERE age BETWEEN 23 AND 34;    /* can access by the domain */
+
+
+/* comments and expressions */
+
+--This is a comment!      /* this is how we add comments, im assuming you would only want to do this in a sql GUI rather than terminal */
+
+SELECT name AS employee_name FROM company;  -- AS expression, we can alter the output of a column name with this this expression
+SELECT COUNT * FROM company;  -- this counts the amount of objects inside of the table
+SELECT MAX(age) FROM company;
+SELECT MIN(age) FROM company;
+
+SELECT SUM(salary) FROM company;
+SELECT AVG(salary) FROM company;
+
+/* timestamp! */
+SELECT current_timestamp;     /* gives us the timestamp of the current time on our machine */
+
+/* CHECKS and other CONSTRAINTS */
+
+CREATE TABLE products ( product_no smallint, name text, price numeric CHECK (price > 0));
+INSERT INTO products VALUES(10,'popcorn',-10);    /* this will fail because it the prices doesn't match the CHECK constraint. */
+INSERT INTO produces VALUES(10,'popcorn',10);
+ALTER TABLE products ADD COLUMN discounted_price numeric CHECK(discounted_price>0 AND discounted_price < price);
+INSERT INTO products VALUES(1,'SOAP',10,9);
+
+
+/* NOT NULL, add this constraint when you want a column to have an input. */
+/* the UNIQUE constraint forces all inputs to be unique */
+
+-- for the purpose of having to have unique keys and stuff we will drop the previous product table and create a fresh new one
+
+/* PRIMARY AND FOREIGN KEY
+    - you should always implement some kind of primary key into your databases it avoids alias objects and mishandling them
+    - foreign key, some value in a column must match a value in another column that is in another table
+*/
+CREATE TABLE products(
+  product_no smallint PRIMARY KEY,
+  name text,
+  price numeric
+);
+
+INSERT INTO products VALUES(1,'Soap',50)    --productNumber=1, name='Soap', price=10
+
+-- creating a table so that we can see how FOREIGN KEYS work.
+
+CREATE TABLE orders(
+  order_id smallint PRIMARY KEY,
+  product_no smallint REFERENCES products(product_no),     -- this sets all the values of the product_no should be the same as the ones in the produc table
+  quantity smallint
+);
+
+INSERT INTO orders VALUES(1,1,2);        -- order_number = 1, product_number = 1 (this is soap referenced from other table), quantity = 2)
+INSERT INTO orders VALUES(1,13,2);       -- this will throw an error because the product ID does not exist in the produc table
+
+
+
+CREATE TABLE orders_2(
+  order_id smallint PRIMARY KEY,
+  address text
+);
+
+CREATE TABLE order_items(       -- objects in this table cannot be created unless there are valid items in the other tables
+  product_no smallint REFERENCES products(product_no),
+  order_id smallint REFERENCES orders_2(order_id),
+  quantity smallint,
+  PRIMARY KEY(product_no,order_id)
+);
+
+
+INSERT INTO orders_2 VALUES (1,'Delhi'), (2,'Kolkata');
+INSERT INTO products VALUES (2,'Shampoo',4);
+INSERT INTO order_items VALUES(1,2,4);     -- "the items ordered was from 'order #1' and it was shampoo. This order had 4 of those"
+
+
+
+/* updating and deleting from tables , the important thing to make sure you have is that everything has primary key to avoid alias */
+UPDATE compary SET age=20 WHERE name="ahmed";     -- basic update script
+DELETE FROM company WHERE id=1;      -- basic deleting script , this deletes the whole row, if you want to change one part you have to use update.
+
+
+/* GROUP BY and HAVING CLAUSES */
+
+SELECT age,COUNT(*) FROM company GROUP BY age;  -- give me a column of ages and column of counts where we are grouping everything by the age.
+SELECT COUNT(*) FROM company GROUP BY age; -- count everything but just give me the counts of everything that is grouped by their age.
+
+SELECT address, COUNT(*) FROM company GROUP BY address HAVING MAX(salary) > 2000;
+
+
+/* ORDER BY CLAUSE */
+SELECT * FROM company ORDER BY age;       -- orders it by age, self explanatory. ASC (ascending) DESC (descending)
+SELECT * FROM company ORDER BY age,salary;  -- order by age first, if clash, order it by the salary. Default ordering is ascending order.
+
+
+/* ARRAYS IN POSTGRESQL */
+CREATE TABLE table_array(
+  name text,
+  pay integer[],        -- dont have to declare size
+  schedule text[][]
+  );
+
+INSERT INTO table_array VALUES('Rahul','{10000,10000,10000,10000}', '{{"meeting","lunch"},{"training","presentation"}}');
+INSERT INTO table_array VALUES('Rishi','{10000,25000,50000,10000}','{{meeting,dinner},{walk,presentation}}');
+SELECT pay[2] FROM table_array;
+SELECT schedule[0][1] FROM table_array;
+SELECT schedule FROM table_array WHERE name='Rahul';
+
+-- side scripts
+ALTER TABLE company ADD CONSTRAINT pri PRIMARY KEY(id);     -- makes the 'id' in company a primary key
+ALTER TABLE company DROP CONSTRAIN pri;                     -- drops the constrain named 'pri';
+SELECT * FROM company LIMIT 4;                              -- give me the first 4
+SELECT * FROM COMPANY LIMIT 4 OFFSET 4;                     -- give me the first 4 after the first 4 people

@@ -1,0 +1,315 @@
+Homework #3
+Your name:	Jonathan Phouminh
+Collaborated: Zach Chommala 
+
+
+---------------------------------------- Question 1 Query ----------------------------------------
+
+								SELECT last_name,first_name FROM employees WHERE country != 'UK' AND
+								EXTRACT(YEAR FROM hire_date) <= 2014 ORDER BY last_name;
+
+---------------------------------------- Question 1 Results ----------------------------------------
+
+																				last_name | first_name
+																				-----------+------------
+																				Callahan  | Laura
+																				Davolio   | Nancy
+																				Fuller    | Andrew
+																				Leverling | Janet
+																				Peacock   | Margaret
+																				(5 rows)
+
+
+---------------------------------------- Question 2 Query ----------------------------------------
+
+									SELECT product_id,product_name,units_in_stock,unit_price  FROM products WHERE units_in_stock >= 1
+									AND units_in_stock < reorder_level;
+
+---------------------------------------- Question 2 Results ----------------------------------------
+
+									product_id |       product_name        | units_in_stock | unit_price
+									------------+---------------------------+----------------+------------
+									2 | Chang                     |             17 |         19
+									3 | Aniseed Syrup             |             13 |         10
+									11 | Queso Cabrales            |             22 |         21
+									21 | Sir Rodney's Scones       |              3 |         10
+									30 | Nord-Ost Matjeshering     |             10 |      25.89
+									32 | Mascarpone Fabioli        |              9 |         32
+									37 | Gravad lax                |             11 |         26
+									43 | Ipoh Coffee               |             17 |         46
+									45 | Rogede sild               |              5 |        9.5
+									48 | Chocolade                 |             15 |      12.75
+									49 | Maxilaku                  |             10 |         20
+									56 | Gnocchi di nonna Alice    |             21 |         38
+									64 | Wimmers gute Semmelknödel |             22 |      33.25
+									66 | Louisiana Hot Spiced Okra |              4 |         17
+									68 | Scottish Longbreads       |              6 |       12.5
+									70 | Outback Lager             |             15 |         15
+									74 | Longlife Tofu             |              4 |         10
+
+
+---------------------------------------- Question 3 Query ----------------------------------------
+								SELECT product_name FROM products WHERE unit_price = (SELECT MIN(unit_price) FROM products);
+
+
+---------------------------------------- Question 3 Results ----------------------------------------
+
+								product_name
+								--------------
+								Geitost
+
+---------------------------------------- Question 4 Query ----------------------------------------
+
+					SELECT product_id,product_name,(units_in_stock * unit_price) AS VALUE FROM products WHERE (units_in_stock * unit_price) < 200
+					ORDER BY (units_in_stock * unit_price);
+---------------------------------------- Question 4 Results ----------------------------------------
+
+										product_id |       product_name        |      value
+										------------+---------------------------+------------------
+										29 | Thüringer Rostbratwurst   |                0
+										5 | Chef Anton's Gumbo Mix    |                0
+										53 | Perth Pasties             |                0
+										17 | Alice Mutton              |                0
+										31 | Gorgonzola Telino         |                0
+										21 | Sir Rodney's Scones       |               30
+										74 | Longlife Tofu             |               40
+										45 | Rogede sild               |             47.5
+										66 | Louisiana Hot Spiced Okra |               68
+										68 | Scottish Longbreads       |               75
+										24 | Guaraná Fantástica        |               90
+										3 | Aniseed Syrup             |              130
+										13 | Konbu                     |              144
+										54 | Tourtière                 | 156.449995994568
+										48 | Chocolade                 |           191.25
+
+
+---------------------------------------- Question 5 Query ----------------------------------------
+
+										List the country and a count of orders
+									  for all orders that shipped from that country for all countries other than the USA during August 1996.
+
+										SELECT ship_country,COUNT(ship_country)Shipment_Count FROM orders
+										WHERE EXTRACT(MONTH FROM shipped_date) = 8
+										AND EXTRACT(YEAR FROM shipped_date) = 1996
+										GROUP BY ship_country
+										HAVING ship_country != 'USA';
+
+
+---------------------------------------- Question 5 Results ----------------------------------------
+
+										ship_country | shipment_count
+										--------------+----------------
+										Brazil       |              1
+										Finland      |              1
+										France       |              2
+										Germany      |              7
+										Italy        |              1
+										Mexico       |              1
+										Spain        |              2
+										Sweden       |              2
+										UK           |              1
+										Venezuela    |              2
+
+
+---------------------------------------- Question 6 Query ----------------------------------------
+
+										SELECT customer_id FROM orders
+										GROUP BY customer_id
+										HAVING COUNT(customer_id) < 4
+										ORDER BY customer_id DESC;
+
+---------------------------------------- Question 6 Results ----------------------------------------
+
+										customer_id
+										-------------
+										TRAIH
+										THECR
+										NORTS
+										LAZYK
+										LAUGB
+										GROSR
+										FRANR
+										CONSH
+										CENTC
+										BOLID
+
+---------------------------------------- Question 7 Query ----------------------------------------
+
+										SELECT supplier_id, SUM(unit_price * units_in_stock)
+										FROM products GROUP BY supplier_id HAVING COUNT(supplier_id) > 3;
+
+
+---------------------------------------- Question 7 Results ----------------------------------------
+
+											supplier_id |       sum
+											-------------+------------------
+											7 | 4409.65005874634
+											12 | 3301.84996032715
+											2 |  2833.7999420166
+											8 | 4276.99999523163
+
+
+---------------------------------------- Question 8 Query ----------------------------------------
+
+											SELECT product_name,unit_price,company_name
+											FROM products INNER JOIN suppliers
+											ON suppliers.country = 'France' AND suppliers.supplier_id = products.supplier_id
+											ORDER BY unit_price;
+
+
+---------------------------------------- Question 8 Results ----------------------------------------
+
+											product_name      | unit_price |        company_name
+											------------------------+------------+----------------------------
+											Escargots de Bourgogne |      13.25 | Escargots Nouveaux
+											Chartreuse verte       |         18 | Aux joyeux ecclésiastiques
+											Camembert Pierrot      |         34 | Gai pâturage
+											Raclette Courdavault   |         55 | Gai pâturage
+											Côte de Blaye          |      263.5 | Aux joyeux ecclésiastiques
+
+
+---------------------------------------- Question 9 Query ----------------------------------------
+-- is this meant to be employees that have orders less than or equal to 72?
+
+				SELECT employees.last_name, employees.first_name, employees.title, employees.extension
+				FROM orders INNER JOIN employees ON employees.employee_id = orders.employee_id
+				GROUP BY employees.last_name, employees.first_name, employees.title, employees.extension
+
+
+---------------------------------------- Question 9 Results ----------------------------------------
+
+									last_name | first_name |        title         | extension
+									-----------+------------+----------------------+-----------
+									Suyama    | Michael    | Sales Representative | 428
+									Buchanan  | Steven     | Sales Manager        | 3453
+									King      | Robert     | Sales Representative | 465
+									Dodsworth | Anne       | Sales Representative | 452
+
+
+---------------------------------------- Question 10 Query ----------------------------------------
+
+
+											CREATE TABLE top_items(
+												item_id smallint NOT NULL,
+												item_code smallint NOT NULL,
+												item_name varchar(40) NOT NULL,
+												inventory_date DATE NOT NULL,
+												supplier_id smallint NOT NULL,
+												item_quantity smallint NOT NULL,
+												item_price decimal(9,2) NOT NULL,
+												PRIMARY KEY(item_id)
+											);
+
+---------------------------------------- Question 11 Query ----------------------------------------
+
+										INSERT INTO top_items (
+												SELECT product_id,category_id,product_name, '1948-08-08',units_in_stock,unit_price,supplier_id
+												FROM products
+												WHERE (units_in_stock * unit_price) > 2500);
+
+---------------------------------------- Question 12 Query ----------------------------------------
+
+										DELETE FROM top_items WHERE item_quantity < 50;
+
+---------------------------------------- Question 13 Query ----------------------------------------
+
+										ALTER TABLE top_items ADD COLUMN inventory_value decimal(9,2) DEFAULT 0;
+
+---------------------------------------- Question 14 Query ----------------------------------------
+
+										UPDATE top_items SET inventory_value = item_price * item_quantity;
+
+---------------------------------------- Question 15 Query ----------------------------------------
+
+										DROP TABLE top_items; 		-- didn't really drop it
+---------------------------------------- Question 16 Query ----------------------------------------
+
+SELECT employees.last_name, employees.first_name, COUNT(DISTINCT(orders.customer_id)) orders
+FROM employees INNER JOIN orders ON
+employees.employee_id = orders.employee_id GROUP BY employees.last_name, employees.first_name
+HAVING COUNT(DISTINCT(orders.customer_id)) >= 50;
+;
+
+-- Result from query
+													last_name | first_name | orders
+													-----------+------------+--------
+													Callahan  | Laura      |     56
+													Davolio   | Nancy      |     65
+													Fuller    | Andrew     |     59
+													Leverling | Janet      |     63
+													Peacock   | Margaret   |     75
+													(5 rows)
+
+---------------------------------------- Question 17 Query ----------------------------------------
+
+		SELECT product_name FROM products WHERE unit_price < (SELECT AVG(unit_price) FROM products);
+
+
+-- Output was very long
+													...		Outback Lager
+																Flotemysost
+																Röd Kaviar
+																Longlife Tofu
+																Rhönbräu Klosterbier
+																Lakkalikööri
+																Original Frankfurter grüne Soße
+																(52 rows)
+
+
+---------------------------------------- Question 18 Query ----------------------------------------
+							SELECT COUNT(DISTINCT(employees.first_name)) FROM employees INNER JOIN orders ON
+							employees.address != orders.ship_address;
+
+-- result from query
+																				count
+																				-------
+																						9
+																				(1 row)
+
+---------------------------------------- Question 19 Query ----------------------------------------
+
+
+SELECT employees.last_name, employees.first_name, COUNT(DISTINCT(orders.customer_id)) Orders FROM employees
+INNER JOIN orders ON employees.employee_id = orders.employee_id and EXTRACT(YEAR FROM orders.shipped_date) = 1998
+GROUP BY employees.last_name, employees.first_name HAVING COUNT(DISTINCT(orders.customer_id)) >= 0;
+
+-- result from query
+
+																	last_name | first_name | orders
+																	-----------+------------+--------
+																	Buchanan  | Steven     |     11
+																	Callahan  | Laura      |     21
+																	Davolio   | Nancy      |     30
+																	Dodsworth | Anne       |     16
+																	Fuller    | Andrew     |     33
+																	King      | Robert     |     22
+																	Leverling | Janet      |     32
+																	Peacock   | Margaret   |     32
+																	Suyama    | Michael    |     18
+																	(9 rows)
+
+
+---------------------------------------- Question 20 Query ----------------------------------------
+
+SELECT COUNT(*) FROM orders WHERE ship_country = 'Sweden' AND EXTRACT(DAY FROM order_date) + 7 < EXTRACT(DAY FROM shipped_date)
+AND EXTRACT(YEAR FROM order_date) = EXTRACT(YEAR FROM shipped_date) AND EXTRACT(MONTH FROM order_date) = EXTRACT(MONTH FROM shipped_date);
+
+-- result form query
+																				count
+																				-------
+																				 13
+																				(1 row)
+---------------------------------------- Question 21 Query ----------------------------------------
+
+															SELECT product_name FROM suppliers INNER JOIN products ON suppliers.company_name = 'Leka Trading'
+															AND suppliers.supplier_id = products.supplier_id;
+
+-- result from query
+																			  product_name
+															-------------------------------
+															Singaporean Hokkien Fried Mee
+															Ipoh Coffee
+															Gula Malacca
+
+
+																																																																																put query here

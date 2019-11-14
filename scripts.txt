@@ -1,0 +1,7 @@
+/* Create an alphabetical listing (last name, first name) of
+all employees not living the in the UK who have been employed
+by Northwinds for at least5
+years as of the due date of this assignment (2019-04-14). */
+
+SELECT last_name,first_name FROM employees WHERE country != 'UK' AND
+EXTRACT(YEAR FROM hire_date) <= 2014 ORDER BY last_name;
